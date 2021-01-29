@@ -24,23 +24,34 @@ app.get('/cotizaciones/usd/:year/:month', (req, res) => {
         return res.status(400).send(error.message)
     }
 
-    getData(year, month, info => res.status(200).send(info))
+    getData(year, month, function (err, info) {
+        if (err) res.status(500).send(err)
+        else res.status(200).send(info);
+    })
 })
 
 
 function validateParams(year = 0, month = 0) {
-    const yearOk = year >= 2010 && year <= 2021
+    if (isNaN(year)) throw new Error(`Año debe ser numerico!`)
+
+    if (isNaN(month)) throw new Error(`Mes debe ser numerico!`)
+
+    const today = new Date()
+    const currentYear = today.getFullYear()
+    const yearOk = year >= 2010 && year <= currentYear
+    if (!yearOk) throw new Error(`Año ${year} invalido. El valor debe ser mayor o igual a 2010!`)
+
+    const currentMonth = today.getMonth() + 1
+    const futureDate = year == currentYear && month > currentMonth
+    if (futureDate) throw new Error(`Año ${year}, Mes ${month} corresponde a una fecha futura`)
+    
     const monthOk = month >= 1 && month <= 12
-    if (!yearOk) {
-        throw new Error(`El año ${year} debe ser mayor o igual a 2010!`)
-    }
-    if (!monthOk) {
-        throw new Error(`El mes ${month} debe ser entre 1 y 12 inclusive`)
-    }
+    if (!monthOk) throw new Error(`Mes ${month} invalido. El valor debe estar entre 1 y 12 inclusive`)
+
 }
 
 function getData(year, month, callback) {
-    var html = '';
+    let html = '';
 
     const pathSuffix = `${MONTHS[month - 1]}-${year}`
 
@@ -56,19 +67,26 @@ function getData(year, month, callback) {
             // collect the data chunks to the variable named \"html\"
             html += data;
         }).on('end', function () {
-            console.log("html is ", html)
-            const dom = new JSDOM(html);
+            try {
+                const dom = new JSDOM(html);
 
-            const $ = jquery(dom.window);
-            const usdBuy = $("#dataTable tbody tr:last td:eq(1)")
-            const usdSell = $("#dataTable tbody tr:last td:eq(1)")
+                const $ = jquery(dom.window);
+                const usdBuy = $("#dataTable tbody tr:last td:eq(1)")
+                const usdSell = $("#dataTable tbody tr:last td:eq(1)")
 
-            const usdBuyNum = Number.parseFloat(usdBuy.text().replace(/,/g, "."))
-            const usdSellNum = Number.parseFloat(usdSell.text().replace(/,/g, "."))
-
-            callback({"periodo": pathSuffix, "compra": usdBuyNum, "venta": usdSellNum})
+                const usdBuyNum = parseAmount(usdBuy.text())
+                const usdSellNum = parseAmount(usdSell.text())
+                callback(null, { "periodo": pathSuffix, "compra": usdBuyNum, "venta": usdSellNum })
+            } catch (error) {
+                callback(error, null)
+            }
         });
     });
+}
+
+function parseAmount(sval) {
+    const snorm = sval.replace(/,/g, ".")
+    return Number.parseFloat(snorm);
 }
 
 
