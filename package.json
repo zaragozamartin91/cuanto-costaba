@@ -1,0 +1,22 @@
+{
+  "name": "cuanto_costaba",
+  "version": "1.0.0",
+  "description": "App que determina cuanto costaba un producto comprado en dolares",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "keywords": [
+    "cuanto",
+    "costaba",
+    "dolares"
+  ],
+  "author": "Martin Zaragoza",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.17.1",
+    "jquery": "^3.5.1",
+    "jsdom": "^16.4.0"
+  }
+}
