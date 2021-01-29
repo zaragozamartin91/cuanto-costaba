@@ -15,8 +15,6 @@ fs.readFile('cotizacion_dolar_blue_enero_2020.html', 'utf8', function (err, data
 
     console.log("pure usd: ", usd)
 
-    //   const usd = dom.window.document.querySelector("#dataTable tbody tr:last td:eq(1)").textContent
-
     console.log("usd cost: ", usd.text())
 });
 

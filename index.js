@@ -26,9 +26,13 @@ app.get('/cotizaciones/usd/:year/:month', (req, res) => {
 
     getData(year, month, function (err, info) {
         if (err) res.status(500).send(err)
-        else res.status(200).send(info);
+        else res.status(200).send({
+            "periodo": info.period, "compra": info.buy, "venta": info.sell, "anio": year, "mes": month
+        });
     })
 })
+
+
 
 
 function validateParams(year = 0, month = 0) {
@@ -44,7 +48,7 @@ function validateParams(year = 0, month = 0) {
     const currentMonth = today.getMonth() + 1
     const futureDate = year == currentYear && month > currentMonth
     if (futureDate) throw new Error(`Año ${year}, Mes ${month} corresponde a una fecha futura`)
-    
+
     const monthOk = month >= 1 && month <= 12
     if (!monthOk) throw new Error(`Mes ${month} invalido. El valor debe estar entre 1 y 12 inclusive`)
 
@@ -76,7 +80,7 @@ function getData(year, month, callback) {
 
                 const usdBuyNum = parseAmount(usdBuy.text())
                 const usdSellNum = parseAmount(usdSell.text())
-                callback(null, { "periodo": pathSuffix, "compra": usdBuyNum, "venta": usdSellNum })
+                callback(null, { "period": pathSuffix, "buy": usdBuyNum, "sell": usdSellNum })
             } catch (error) {
                 callback(error, null)
             }
