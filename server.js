@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(express.static("public"));
 
 
-app.get('/hello', (req, res) => {
+app.get('/hello', (_req, res) => {
     res.status(200).send('Hello world')
 })
 
@@ -30,9 +30,7 @@ app.get('/currency-exchange/usd/year/:year/month/:month', async (req, res, next)
 
     try {
         const info = await getCurrencyByDate({ currency: 'usd', year, month, day: 0 })
-        res.status(200).send({
-            "periodo": info.period, "compra": info.buy, "venta": info.sell, "anio": year, "mes": month
-        })
+        res.status(200).send({ "compra": info.buy, "venta": info.sell, "a\u0148o": year, "mes": month })
     } catch (error) { next(error) }
 })
 

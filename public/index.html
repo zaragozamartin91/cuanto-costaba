@@ -1,12 +1,121 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+    <title>Cuanto costaba</title>
+
+    <style type="text/css">
+        #centered_div {
+            margin-top: 100px;
+            margin-left: 100px;
+            margin-right: 100px;
+        }
+
+        #submitBtn {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+
 </head>
+
 <body>
-    Hello world
+
+    <div id="centered_div">
+
+        <div class="jumbotron">
+            <h1 class="display-4">¿Cuanto costaba?</h1>
+            <p class="lead">Encontra cuanto pagaste en dolares por esa cosa que compraste hace mil años (bueno, no
+                tanto)</p>
+            <hr class="my-4">
+        </div>
+
+        <form>
+            <div class="form-group">
+                <label for="costInput">Precio (en pesos Argentinos)</label>
+                <input class="form-control" type="number" step="0.01" id="costInput" />
+                <small class="form-text text-muted">Usar '.' como simbolo decimal</small>
+            </div>
+
+            <div class="form-group">
+                <label for="purchaseDate">Fecha de compra</label>
+                <input type="date" class="form-control" id="purchaseDate" data-date-format="DD MMMM YYYY">
+                <small class="form-text text-muted">Ingresar fecha de compra aproximada</small>
+            </div>
+
+            <button type="button" id="submitBtn" class="btn btn-primary" onclick="getPricing()">Consultar</button>
+
+            <div id="pricingSuccess" class="alert alert-success" role="alert" hidden="true"></div>
+            <div id="pricingFailure" class="alert alert-danger" role="alert" hidden="true"></div>
+
+
+        </form>
+
+    </div>
+
+    <script>
+        function getPricing() {
+            const pricingSuccessAlert = document.getElementById('pricingSuccess')
+            pricingSuccessAlert.hidden = true
+            const pricingFailureAlert = document.getElementById('pricingFailure')
+            pricingFailureAlert.hidden = true
+
+            console.log('hello there')
+            const cost = document.getElementById('costInput').value
+            if (isNaN(Number.parseFloat(cost))) {
+                pricingFailureAlert.hidden = false
+                pricingFailureAlert.innerHTML = 'El valor de costo ingresado es invalido!'
+                return;
+            }
+
+            const date = document.getElementById('purchaseDate').value
+            if (isNaN(Date.parse(date))) {
+                pricingFailureAlert.hidden = false
+                pricingFailureAlert.innerHTML = 'El valor de fecha ingresada es invalida!'
+                return;
+            }
+
+            console.log(`cost: ${cost} , purchase date: ${date}`)
+            const [year, month, day] = date.split('-')
+
+            console.log("Parsed date:")
+            console.log({ year, month, day })
+
+            $.get(
+                `/currency-exchange/usd/year/${year}/month/${month}`,
+                function (data) {
+                    const { compra, venta } = data
+                    const avg = (compra + venta) / 2
+                    const result = cost / avg
+
+                    pricingSuccessAlert.hidden = false
+                    pricingSuccessAlert.innerHTML = `Pagaste ${cost} pesos que equivale a ${result.toFixed(2)} USD aproximadamente`
+                }
+            ).fail(function (err) {
+                console.error(err)
+                const { msg, cause } = err.responseJSON || {}
+                pricingFailureAlert.hidden = false
+                if (cause) {
+                    pricingFailureAlert.innerHTML = `${msg} - ${cause}`
+                } else if (err.status == 0) {
+                    pricingFailureAlert.innerHTML = `Error de conexion`
+                } else {
+                    pricingFailureAlert.innerHTML = `error desconocido`
+                }
+            });
+        }
+    </script>
+
 </body>
+
 </html>

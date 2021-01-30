@@ -3,6 +3,7 @@ const dbFile = "./.data/sqlite.db"
 const sqlite3 = require("sqlite3").verbose()
 const db = new sqlite3.Database(dbFile)
 
+if (process.env.CURRENCY_TABLE === undefined) throw new Error("Env-var CURRENCY_TABLE not defined!")
 
 // if ./.data/sqlite.db does not exist, create it, otherwise print records to console
 db.serialize(() => {
