@@ -64,55 +64,70 @@
     </div>
 
     <script>
-        function getPricing() {
-            const pricingSuccessAlert = document.getElementById('pricingSuccess')
-            pricingSuccessAlert.hidden = true
+        function enableSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn').disabled = false
+        }
+
+        function disableSubmitButton() {
+            const submitBtn = document.getElementById('submitBtn').disabled = true
+        }
+
+        function setPricingFailure(enabled, msg = '') {
             const pricingFailureAlert = document.getElementById('pricingFailure')
-            pricingFailureAlert.hidden = true
+            pricingFailureAlert.hidden = !enabled
+            pricingFailureAlert.innerHTML = msg
+        }
 
-            console.log('hello there')
-            const cost = document.getElementById('costInput').value
-            if (isNaN(Number.parseFloat(cost))) {
-                pricingFailureAlert.hidden = false
-                pricingFailureAlert.innerHTML = 'El valor de costo ingresado es invalido!'
-                return;
-            }
+        function setPricingSuccess(enabled, msg = '') {
+            const pricingSuccessAlert = document.getElementById('pricingSuccess')
+            pricingSuccessAlert.hidden = !enabled
+            pricingSuccessAlert.innerHTML = msg
+        }
 
-            const date = document.getElementById('purchaseDate').value
-            if (isNaN(Date.parse(date))) {
-                pricingFailureAlert.hidden = false
-                pricingFailureAlert.innerHTML = 'El valor de fecha ingresada es invalida!'
-                return;
-            }
+        function getPricing() {
+            new Promise((resolve, reject) => {
+                disableSubmitButton()
+                setPricingFailure(false)
+                setPricingSuccess(false)
 
-            console.log(`cost: ${cost} , purchase date: ${date}`)
-            const [year, month, day] = date.split('-')
-
-            console.log("Parsed date:")
-            console.log({ year, month, day })
-
-            $.get(
-                `/currency-exchange/usd/year/${year}/month/${month}`,
-                function (data) {
-                    const { compra, venta } = data
-                    const avg = (compra + venta) / 2
-                    const result = cost / avg
-
-                    pricingSuccessAlert.hidden = false
-                    pricingSuccessAlert.innerHTML = `Pagaste ${cost} pesos que equivale a ${result.toFixed(2)} USD aproximadamente`
+                const cost = document.getElementById('costInput').value
+                const parCost = Number.parseFloat(cost)
+                if (isNaN(parCost) || parCost <= 0) {
+                    return reject({ kind: 'cost', msg: 'El valor de costo ingresado es invalido!' })
                 }
-            ).fail(function (err) {
-                console.error(err)
-                const { msg, cause } = err.responseJSON || {}
-                pricingFailureAlert.hidden = false
-                if (cause) {
-                    pricingFailureAlert.innerHTML = `${msg} - ${cause}`
-                } else if (err.status == 0) {
-                    pricingFailureAlert.innerHTML = `Error de conexion`
-                } else {
-                    pricingFailureAlert.innerHTML = `error desconocido`
+
+                const date = document.getElementById('purchaseDate').value
+                if (isNaN(Date.parse(date))) {
+                    return reject({ kind: 'date', msg: 'El valor de fecha ingresada es invalida!' })
                 }
-            });
+
+                console.log(`cost: ${cost} , purchase date: ${date}`)
+                const [year, month, day] = date.split('-')
+
+                console.log("Parsed date:")
+                console.log({ year, month, day })
+
+                $.get(
+                    `/currency-exchange/usd/year/${year}/month/${month}`,
+                    function (data) {
+                        resolve({ data, cost })
+                    }
+                ).fail(function (err) {
+                    console.error(err)
+                    const { msg, cause } = err.responseJSON || {}
+                    if (cause) reject({ kind: 'resolve', msg: `${msg} - ${cause}` })
+                    else if (err.status == 0) reject({ kind: 'resolve', msg: `Error de conexion` })
+                    else reject({ kind: 'resolve', msg: `error desconocido` })
+                })
+            }).then(({ data, cost }) => {
+                console.log("RESOLVING")
+                const { compra, venta } = data
+                const avg = (compra + venta) / 2
+                const result = cost / avg
+
+                setPricingSuccess(true, `Pagaste ${cost} pesos que equivale a ${result.toFixed(2)} USD aproximadamente`)
+            }).catch(err => setPricingFailure(true, err.msg)
+            ).finally(() => enableSubmitButton())
         }
     </script>
 
