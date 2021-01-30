@@ -1,23 +1,31 @@
 {
-  "name": "cuanto_costaba",
-  "version": "1.0.0",
-  "description": "App que determina cuanto costaba un producto comprado en dolares",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
-  },
-  "keywords": [
-    "cuanto",
-    "costaba",
-    "dolares"
-  ],
-  "author": "Martin Zaragoza",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.17.1",
-    "jquery": "^3.5.1",
-    "jsdom": "^16.4.0",
-    "sqlite3": "^5.0.1"
-  }
+    "//1": "describes your app and its dependencies",
+    "//2": "https://docs.npmjs.com/files/package.json",
+    "//3": "updating this file will download and update your packages",
+    "name": "cuanto_costaba",
+    "version": "1.0.0",
+    "description": "App que determina cuanto costaba un producto comprado en dolares",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js"
+    },
+    "author": "Martin Zaragoza",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.17.1",
+        "jquery": "^3.5.1",
+        "jsdom": "^16.4.0",
+        "sqlite3": "^4.1.1"
+    },
+    "engines": {
+        "node": "12.x"
+    },
+    "repository": {
+        "url": "https://glitch.com/edit/#!/hello-sqlite"
+    },
+    "keywords": [
+        "cuanto",
+        "costaba",
+        "dolares"
+    ]
 }
