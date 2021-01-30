@@ -1,41 +1,19 @@
-const sqlite3 = require('sqlite3').verbose();
+const db = require('./config/configureDatabase')
+const storeCurrency = require('./usecase/storeCurrency')(db)
+const queryCurrency = require('./usecase/queryCurrencyByDate')(db)
 
-let db = new sqlite3.Database('./db/currency.db', (err) => {
-    if (err) console.error(err.message);
-    else console.log('Connected to the currency database.');
-});
+async function main() {
+    const id = await storeCurrency({currency: 'usd', year: 1991, month: 03, day: 21, buy: 3.5, sell: 3.6})
+    console.log("inserted id: ", id)
+    const record = await queryCurrency({currency: 'usd', year: 1991, month: 03, day: 21})
+    return record
+}
 
+async function queryMissing() {
+    const record = await queryCurrency({currency: 'ars', year: 1991, month: 03, day: 21})
+    return record
+}
 
-const createTableQuery = `CREATE TABLE IF NOT EXISTS currencies(
-      currency TEXT,
-      year INTEGER,
-      month INTEGER,
-      day INTEGER,
-      value REAL
-)`
+main().then(r => console.log("record: ", r)).finally(() => db.close())
 
-
-db.run(createTableQuery)
-
-const insertCurrencyQuery = `INSERT INTO 
-    currencies(currency,year,month,day,value) 
-    VALUES(?,?,?,?,?)`
-
-db.run(insertCurrencyQuery, ['USD', 2020, 10, 0, 140.50], function (err) {
-    if (err) {
-        return console.log(err.message);
-    }
-    // get the last insert id
-    console.log(`A row has been inserted with rowid ${this.lastID}`);
-});
-
-db.get('SELECT * FROM currencies WHERE currency=?', ['USD'], (err, row) => {
-    if (err) return console.error(err.message);
-    return row
-        ? console.log(row)
-        : console.log(`No currency found with the id USD`);
-
-})
-
-db.close()
 
