@@ -11,11 +11,15 @@ module.exports = /**
                 const placeholders = data.map((_d) => '(?,?,?,?,?,?)').join(',');
                 const insertQuery = `INSERT INTO ${process.env.CURRENCY_TABLE}(currency, year, month, day, buy, sell) VALUES ${placeholders}`
 
+                console.log("Query: ", insertQuery)
+
                 const params = []
                 data.forEach(e => {
                     const { currency, year, month, day, buy, sell } = e
                     params.push(currency, year, month, day, buy, sell)
                 });
+
+                console.log("Params: ", params)
 
                 db.run(insertQuery, params, function (err) {
                     if (err) return reject(err);

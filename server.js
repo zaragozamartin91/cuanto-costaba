@@ -7,8 +7,8 @@ const parseMonthlyCurrencyExchangeFromHtml = require('./usecase/parseMonthlyCurr
 const fetchMonthlyCurrencyExchange = require('./usecase/fetchMonthlyCurrencyExchange')(https, parseMonthlyCurrencyExchangeFromHtml)
 const db = require('./config/configureDatabase')
 const queryCurrencyByDate = require('./usecase/queryCurrencyByDate')(db)
-const storeCurrency = require('./usecase/storeCurrency')(db)
-const getCurrencyByDate = require('./usecase/getCurrencyByDate')(queryCurrencyByDate, storeCurrency, fetchMonthlyCurrencyExchange);
+const storeMultipleCurrencies = require('./usecase/storeMultipleCurrencies')(db)
+const getCurrencyByDate = require('./usecase/getCurrencyByDate')(queryCurrencyByDate, storeMultipleCurrencies, fetchMonthlyCurrencyExchange);
 
 const express = require("express");
 const bodyParser = require("body-parser");
@@ -24,7 +24,7 @@ app.get('/hello', (_req, res) => {
 })
 
 app.get('/currency-exchange/usd/year/:year/month/:month/day/:day', async (req, res, next) => {
-    console.log("params: ", req.params)
+    console.log("Requesting USD currency exchage for: ", req.params)
 
     const year = Number.parseInt(req.params.year)
     const month = Number.parseInt(req.params.month)
@@ -43,6 +43,7 @@ app.use(function (err, req, res, next) {
         "missing": cause => res.status(404).send({ msg: "Valor no encontrado", cause })
     }
     const handler = handlers[err.kind] || function (cause) { res.status(500).send({ msg: "Error desconocido", cause }) }
+    console.error(err)
     handler(err.message)
 })
 
