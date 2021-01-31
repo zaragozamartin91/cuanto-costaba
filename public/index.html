@@ -124,7 +124,7 @@
                 console.log({ year, month, day })
 
                 $.get(
-                    `/currency-exchange/usd/year/${year}/month/${month}`,
+                    `/currency-exchange/usd/year/${year}/month/${month}/day/${day}`,
                     function (data) {
                         resolve({ data, cost })
                     }
@@ -141,7 +141,7 @@
                 const avg = (compra + venta) / 2
                 const result = cost / avg
 
-                setPricingSuccess(true, `Pagaste ${cost} pesos que equivale a ${result.toFixed(2)} USD aproximadamente`)
+                setPricingSuccess(true, `Pagaste ${cost} pesos que equivale a ${result.toFixed(2)} USD aproximadamente - USD compra: ${compra} , USD venta: ${venta}`)
             }).catch(err => setPricingFailure(true, err.msg)
             ).finally(() => enableSubmitButton())
         }
