@@ -124,7 +124,7 @@
                 console.log({ year, month, day })
 
                 $.get(
-                    `/currency-exchange/usd/year/${year}/month/${month}`,
+                    `/currency-exchange/usd/year/${year}/month/${month}/day/${day}`,
                     function (data) {
                         resolve({ data, cost })
                     }
