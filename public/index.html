@@ -56,20 +56,20 @@
             <hr class="my-4">
         </div>
 
-        <form>
+        <form id="pricing-form" onSubmit="return false;">
 
             <div id="pricingSuccess" class="alert alert-success" role="alert" hidden="true"></div>
             <div id="pricingFailure" class="alert alert-danger" role="alert" hidden="true"></div>
 
             <div class="form-group">
                 <label for="costInput">Precio (en pesos Argentinos)</label>
-                <input class="form-control" type="number" step="0.01" id="costInput" />
+                <input class="form-control" type="number" step="0.01" id="costInput" tabindex="1"/>
                 <small class="form-text text-muted">Usar '.' como simbolo decimal</small>
             </div>
 
             <div class="form-group">
                 <label for="purchaseDate">Fecha de compra</label>
-                <input type="date" class="form-control" id="purchaseDate" data-date-format="DD MMMM YYYY">
+                <input type="date" class="form-control" id="purchaseDate" data-date-format="DD MMMM YYYY" tabindex="2">
                 <small class="form-text text-muted">Ingresar fecha de compra aproximada</small>
             </div>
 
