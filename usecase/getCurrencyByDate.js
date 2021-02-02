@@ -5,23 +5,25 @@ const _fmce = require('./fetchMonthlyCurrencyExchange')
 const MissingItemError = require('../error/MissingItemError')
 const ValidationError = require('../error/ValidationError')
 
-async function validateParams(year = 0, month = 0) {
+/**
+ * Validates DATE query data
+ * @param {number} year Year
+ * @param {number} month Month from 1 to 12
+ * @param {day} day Day from 1 to 31
+ */
+async function validateParams(year = 0, month = 0, day = 0) {
     if (isNaN(year)) throw new ValidationError(`Año debe ser numerico!`)
 
     if (isNaN(month)) throw new ValidationError(`Mes debe ser numerico!`)
 
-    const today = new Date()
-    const currentYear = today.getFullYear()
-    const yearOk = year >= 2010 && year <= currentYear
-    if (!yearOk) throw new ValidationError(`Año ${year} invalido. El valor debe ser mayor o igual a 2010!`)
-
-    const currentMonth = today.getMonth() + 1
-    const futureDate = year == currentYear && month > currentMonth
-    if (futureDate) throw new ValidationError(`Año ${year}, Mes ${month} corresponde a una fecha futura`)
+    if (year < 2010) throw new ValidationError(`La fecha de consulta debe ser posterior a 2010!`)
 
     const monthOk = month >= 1 && month <= 12
     if (!monthOk) throw new ValidationError(`Mes ${month} invalido. El valor debe estar entre 1 y 12 inclusive`)
 
+    const today = new Date()
+    const queryDate = new Date(year, month - 1, day) // UTC month goes from 0 to 11
+    if (queryDate.getTime() > today.getTime()) throw new ValidationError(`${day}/${month}/${year} corresponde a una fecha futura`)
 }
 
 
@@ -34,7 +36,7 @@ module.exports =
      */
     function (queryCurrency, storeMultipleCurrencies, fetchMonthlyCurrencyExchange) {
         return async function ({ currency, year, month, day }, doCache = true) {
-            await validateParams(year, month)
+            await validateParams(year, month, day)
 
             const queryValue = await queryCurrency({ currency, year, month, day });
             if (queryValue) return queryValue;
