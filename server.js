@@ -30,9 +30,13 @@ app.get('/currency-exchange/usd/year/:year/month/:month/day/:day', async (req, r
     const month = Number.parseInt(req.params.month)
     const day = Number.parseInt(req.params.day)
 
+    const today = new Date()
+    const isCurrentMonth = year == today.getUTCFullYear() && month == (today.getUTCMonth() + 1)
+
     try {
-        const info = await getCurrencyByDate({ currency: 'usd', year, month, day })
-        res.status(200).send({ "compra": info.buy, "venta": info.sell, "a\u0148o": year, "mes": month, "dia": day })
+        // do not store in cache if query is for current month
+        const currencyExchange = await getCurrencyByDate({ currency: 'usd', year, month, day }, !isCurrentMonth)
+        res.status(200).send({ "compra": currencyExchange.buy, "venta": currencyExchange.sell, "a\u0148o": year, "mes": month, "dia": day })
     } catch (error) { next(error) }
 })
 

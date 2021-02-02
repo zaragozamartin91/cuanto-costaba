@@ -33,7 +33,7 @@ module.exports =
      * @param {_fmce} fetchMonthlyCurrencyExchange 
      */
     function (queryCurrency, storeMultipleCurrencies, fetchMonthlyCurrencyExchange) {
-        return async function ({ currency, year, month, day }) {
+        return async function ({ currency, year, month, day }, doCache = true) {
             await validateParams(year, month)
 
             const queryValue = await queryCurrency({ currency, year, month, day });
@@ -47,7 +47,10 @@ module.exports =
                         currency, year, month, day: c.date.getUTCDate(), buy: c.buy, sell: c.sell
                     }
                 })
-                storeMultipleCurrencies(inputData)
+                if (doCache) {
+                    console.log("Storing exchange values in cache!")
+                    storeMultipleCurrencies(inputData)
+                }
                 const result = monthlyCurrencyExchange.find(c => c.date.getUTCDate() == day)
                 console.log("result: ")
                 console.log(result)
