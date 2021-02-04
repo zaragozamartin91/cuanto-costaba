@@ -1,6 +1,7 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const jquery = require('jquery')
+const moment = require('moment')
 const ParseError = require('../error/ParseError')
 
 /**
@@ -12,8 +13,6 @@ function parseAmount(sval) {
     return Number.parseFloat(snorm)
 }
 
-
-const MONTH_DAYS = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 
 /**
  * @typedef {{date:Date,buy:number,sell:number}} CurrencyExchangeTuple
@@ -28,23 +27,21 @@ const MONTH_DAYS = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 function buildMonthlyExchange(input = []) {
     if (input.length == 0) return []
 
-    const year = input[0].date.getUTCFullYear()
-    const month = input[0].date.getUTCMonth()
-    const monthDays = MONTH_DAYS[input[0].date.getUTCMonth()]
+    const lastDay = moment(input[0].date).endOf('month').startOf('day')
+    const exchangeTuples = input.slice().reverse() // cloning the array and reversing it
 
-    const exchangeTuples = input.slice().reverse()
-
-    const result = [] // accumulative result
-
-    let prevTuple = null;
-    for (let day = monthDays; day >= 1; day--) {
-        /** @type {{date:Date,buy:number,sell:number}} */
-        const exchangeTuple = exchangeTuples.find(d => d.date.getUTCDate() <= day) || prevTuple || {}
-        result.push({ date: new Date(year, month, day), buy: exchangeTuple.buy, sell: exchangeTuple.sell })
-        prevTuple = exchangeTuple || prevTuple
+    /**
+     * @param {moment.Moment} m 
+     * @param {CurrencyExchangeTuple} prevTuple 
+     * @param {Array.<CurrencyExchangeTuple>} acc 
+     */
+    function solve(m, prevTuple, acc = []) {
+        const exchangeTuple = exchangeTuples.find(et => moment(et.date).date() <= m.date()) || prevTuple || {}
+        acc.push({ date: m.toDate(), buy: exchangeTuple.buy, sell: exchangeTuple.sell })
+        return m.date() == 1 ? acc : solve(m.subtract(1, 'days'), exchangeTuple || prevTuple, acc)
     }
 
-    return result
+   return solve(lastDay, null)
 }
 
 
@@ -64,14 +61,13 @@ module.exports =
 
             const parsedValues = []
             trows.each(function (_index) {
-                const date = $(this).find("td:eq(0)").text()
+                const sdate = $(this).find("td:eq(0)").text()
                 const buy = parseAmount($(this).find("td:eq(1)").text())
                 const sell = parseAmount($(this).find("td:eq(2)").text())
 
-                const splitDate = date.split('/')
-                const trueDate = new Date(`${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`)
+                const date = moment(sdate, "DD/MM/YYYY").toDate()
 
-                parsedValues.push({ date: trueDate, buy, sell })
+                parsedValues.push({ date, buy, sell })
             })
 
             return buildMonthlyExchange(parsedValues)

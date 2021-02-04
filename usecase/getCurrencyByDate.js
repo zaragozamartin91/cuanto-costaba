@@ -1,6 +1,7 @@
 const _qc = require('./queryCurrencyByDate')
 const _sc = require('./storeMultipleCurrencies')
 const _fmce = require('./fetchMonthlyCurrencyExchange')
+const moment = require('moment')
 
 const MissingItemError = require('../error/MissingItemError')
 const ValidationError = require('../error/ValidationError')
@@ -20,10 +21,10 @@ async function validateParams(year = 0, month = 0, day = 0) {
 
     const monthOk = month >= 1 && month <= 12
     if (!monthOk) throw new ValidationError(`Mes ${month} invalido. El valor debe estar entre 1 y 12 inclusive`)
-
-    const today = new Date()
-    const queryDate = new Date(year, month - 1, day) // UTC month goes from 0 to 11
-    if (queryDate.getTime() > today.getTime()) throw new ValidationError(`${day}/${month}/${year} corresponde a una fecha futura`)
+    
+    const arsTime = moment().subtract(3, 'hours')
+    const queryDate = moment(new Date(year, month -1 , day)) // UTC month goes from 0 to 11
+    if (arsTime.diff(queryDate) < 0) throw new ValidationError(`${day}/${month}/${year} corresponde a una fecha futura`)
 }
 
 
