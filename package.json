@@ -7,7 +7,8 @@
     "description": "App que determina cuanto costaba un producto comprado en dolares",
     "main": "server.js",
     "scripts": {
-        "start": "node server.js"
+        "start": "node server.js",
+        "test": "mocha"
     },
     "author": "Martin Zaragoza",
     "license": "ISC",
@@ -15,6 +16,7 @@
         "express": "^4.17.1",
         "jquery": "^3.5.1",
         "jsdom": "^16.4.0",
+        "moment": "^2.29.1",
         "sqlite3": "^4.1.1"
     },
     "engines": {
@@ -27,5 +29,8 @@
         "cuanto",
         "costaba",
         "dolares"
-    ]
+    ],
+    "devDependencies": {
+        "mocha": "^8.2.1"
+    }
 }

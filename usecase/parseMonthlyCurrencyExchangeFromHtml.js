@@ -1,6 +1,7 @@
 const jsdom = require("jsdom");
 const { JSDOM } = jsdom;
 const jquery = require('jquery')
+const moment = require('moment')
 const ParseError = require('../error/ParseError')
 
 /**
@@ -18,6 +19,8 @@ const MONTH_DAYS = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
 /**
  * @typedef {{date:Date,buy:number,sell:number}} CurrencyExchangeTuple
  */
+
+
 
 
 /**
@@ -40,7 +43,7 @@ function buildMonthlyExchange(input = []) {
     for (let day = monthDays; day >= 1; day--) {
         /** @type {{date:Date,buy:number,sell:number}} */
         const exchangeTuple = exchangeTuples.find(d => d.date.getUTCDate() <= day) || prevTuple || {}
-        result.push({ date: new Date(year, month, day), buy: exchangeTuple.buy, sell: exchangeTuple.sell })
+        result.push({ date: new Date(year, month, day, 0), buy: exchangeTuple.buy, sell: exchangeTuple.sell })
         prevTuple = exchangeTuple || prevTuple
     }
 
@@ -64,14 +67,13 @@ module.exports =
 
             const parsedValues = []
             trows.each(function (_index) {
-                const date = $(this).find("td:eq(0)").text()
+                const sdate = $(this).find("td:eq(0)").text()
                 const buy = parseAmount($(this).find("td:eq(1)").text())
                 const sell = parseAmount($(this).find("td:eq(2)").text())
 
-                const splitDate = date.split('/')
-                const trueDate = new Date(`${splitDate[2]}-${splitDate[1]}-${splitDate[0]}`)
+                const date = moment(sdate, "DD/MM/YYYY").toDate()
 
-                parsedValues.push({ date: trueDate, buy, sell })
+                parsedValues.push({ date, buy, sell })
             })
 
             return buildMonthlyExchange(parsedValues)
